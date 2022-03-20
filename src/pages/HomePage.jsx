@@ -9,6 +9,8 @@ import {
   TabPanels,
   TabPanel,
 } from "@chakra-ui/react";
+import Login from "../components/Authentication/Login";
+import Signup from "../components/Authentication/Signup";
 //Box works same as div
 const HomePage = () => {
   return (
@@ -41,12 +43,8 @@ const HomePage = () => {
             <Tab width="50%">Sign up</Tab>
           </TabList>
           <TabPanels>
-            <TabPanel>
-              <p>Login!</p>
-            </TabPanel>
-            <TabPanel>
-              <p>Sign up!</p>
-            </TabPanel>
+            <TabPanel>{<Login />}</TabPanel>
+            <TabPanel>{<Signup />}</TabPanel>
           </TabPanels>
         </Tabs>
       </Box>

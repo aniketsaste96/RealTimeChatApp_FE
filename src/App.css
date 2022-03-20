@@ -3,5 +3,6 @@
 .App {
   min-height: 100vh;
   display: flex;
+  color: black;
   /* background images if getting divided use background-size: cover; & background-position:center */
 }
