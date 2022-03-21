@@ -12,7 +12,10 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { useHistory } from "react-router-dom";
+
 const Login = () => {
+  const history = useHistory();
   const [show, setShow] = useState(false);
 
   const [email, setEmail] = useState();
@@ -25,7 +28,7 @@ const Login = () => {
     setShow(!show);
   };
 
-  const submitHandler = () => {
+  const submitHandler = async () => {
     setLoading(true);
     if (!email || !password) {
       toast({
@@ -36,6 +39,28 @@ const Login = () => {
         position: "bottom",
       });
       setLoading(false);
+    }
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const { data } = await axios.post(
+        "http://localhost:5000/api/user/login",
+        { email, password },
+        config
+      );
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error Occured!!!",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
     }
   };
   return (
