@@ -1,5 +1,6 @@
 import { useDisclosure } from "@chakra-ui/hooks";
 import {
+  Box,
   Button,
   FormControl,
   Input,
@@ -12,6 +13,7 @@ import {
   ModalOverlay,
   useToast,
 } from "@chakra-ui/react";
+
 import axios from "axios";
 import React, { useState } from "react";
 import { ChatState } from "../context/ChatProvider";
@@ -57,7 +59,56 @@ const GroupChatModal = ({ children }) => {
       });
     }
   };
-  const handleSubmit = () => {};
+  const handleSubmit = async () => {
+    //check if all field are filled
+    if (!groupChatName || !selectedUsers) {
+      toast({
+        title: "Please Fill all the fields",
+        status: "warning",
+        duration: 2000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
+    }
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      const { data } = await axios.post(
+        `http://localhost:5000/api/chat/group`,
+        {
+          name: groupChatName,
+          users: JSON.stringify(selectedUsers.map((u) => u._id)),
+        },
+        config
+      );
+
+      setChats([data, ...chats]);
+      onClose();
+      toast({
+        title: "New Group Chat Created!!!",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+        position: "bottom",
+      });
+    } catch (error) {
+      toast({
+        title: "Error Occured",
+        description: "Failed to load Search Results",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  };
+  const handleDelete = (delUser) => {
+    setSelectedUsers(selectedUsers.filter((sel) => sel._id !== delUser._id));
+  };
 
   //add them to our selected array
   const handleGroup = (userToAdd) => {
@@ -104,26 +155,28 @@ const GroupChatModal = ({ children }) => {
                 onChange={(e) => handleSearch(e.target.value)}
               />
             </FormControl>
-            {selectedUsers.map((u) => (
-              <UserBadgeItemItem
-                key={user._id}
-                user={u}
-                handleFunction={() => handleDelete(u)}
-              />
-            ))}
-            {loading ? (
-              <div>loading...</div>
-            ) : (
-              searchResult
-                ?.slice(0, 4)
-                .map((user) => (
-                  <UserListItem
-                    key={user._id}
-                    user={user}
-                    handleFunction={() => handleGroup(user)}
-                  />
-                ))
-            )}
+            <Box w="100%" d="flex" flexWrap="wrap">
+              {selectedUsers.map((u) => (
+                <UserBadgeItem
+                  key={user._id}
+                  user={u}
+                  handleFunction={() => handleDelete(u)}
+                />
+              ))}
+              {loading ? (
+                <div>loading...</div>
+              ) : (
+                searchResult
+                  ?.slice(0, 4)
+                  .map((user) => (
+                    <UserListItem
+                      key={user._id}
+                      user={user}
+                      handleFunction={() => handleGroup(user)}
+                    />
+                  ))
+              )}
+            </Box>
           </ModalBody>
 
           <ModalFooter>
