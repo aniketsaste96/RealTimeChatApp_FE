@@ -1,23 +1,38 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { ChatState } from "../components/context/ChatProvider";
+import {
+  Box,
+  Container,
+  Text,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+} from "@chakra-ui/react";
+import SideDrawer from "../components/miscellaneous/SideDrawer";
+import MyChats from "../components/MyChats";
+import ChatBox from "../components/ChatBox";
 const ChatPage = () => {
-  const [chats, setChats] = useState([]);
-  const fetchChats = async () => {
-    const { data } = await axios.get("http://localhost:5000/api/chats");
-
-    setChats(data);
-  };
-
-  useEffect(() => {
-    fetchChats();
-  }, []);
-
+  //take userState from context
+  const { user } = ChatState();
   return (
     <>
-      <div>
-        {chats.map((chat) => {
-          return <div>{chat.chatName}</div>;
-        })}
+      <div style={{ width: "100%" }}>
+        {/* //if fuser is existed then only render side drawer */}
+        {user && <SideDrawer />}
+
+        <Box
+          d="flex"
+          justifyContent="space-between"
+          w="100%"
+          h="91.5vh"
+          p="10px"
+        >
+          {user && <MyChats />}
+          {user && <ChatBox />}
+        </Box>
       </div>
     </>
   );

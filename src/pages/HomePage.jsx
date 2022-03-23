@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   Container,
@@ -9,10 +9,22 @@ import {
   TabPanels,
   TabPanel,
 } from "@chakra-ui/react";
+import { useHistory } from "react-router-dom";
+
 import Login from "../components/Authentication/Login";
 import Signup from "../components/Authentication/Signup";
 //Box works same as div
 const HomePage = () => {
+  const history = useHistory();
+  useEffect(() => {
+    //SON.parse bcz it is in stringify format
+    const user = JSON.parse(localStorage.getItem("userInfo"));
+
+    //if user is there
+    if (user) {
+      history.push("/chats");
+    }
+  }, [history]);
   return (
     <Container maxW="xl" centerContent>
       <Box
