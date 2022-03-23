@@ -17,6 +17,7 @@ import {
   DrawerBody,
   Input,
   ListItem,
+  Spinner,
 } from "@chakra-ui/react";
 import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import React, { useState } from "react";
@@ -39,7 +40,7 @@ const SideDrawer = () => {
   const history = useHistory();
   const toast = useToast();
   //context
-  const { user } = ChatState();
+  const { user, setSelectedChat, chats, setChats } = ChatState();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const logoutHandler = () => {
@@ -86,7 +87,35 @@ const SideDrawer = () => {
     }
   };
 
-  const accessChat = (userId) => {};
+  const accessChat = async (userId) => {
+    try {
+      setLoadingChat(true);
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      const { data } = await axios.post(
+        `http://localhost:5000/api/chat`,
+        { userId },
+        config
+      );
+      if (!chats.find((c) => c._id === data._id)) setChats([data, ...chats]);
+      setSelectedChat(data);
+      setLoadingChat(false);
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error Occured",
+        description: "Failed to load Search Results",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  };
 
   return (
     <>
@@ -101,7 +130,7 @@ const SideDrawer = () => {
       >
         <Tooltip label="Search user to chat" hasArrow placement="bottom-end">
           <Button variant="ghost" onClick={onOpen}>
-            <i class="fas fa-search"></i>
+            <i className="fas fa-search"></i>
             <Text d={{ base: "none", md: "flex" }} px="4">
               {" "}
               Search User
@@ -162,6 +191,7 @@ const SideDrawer = () => {
                 ></UserListItem>
               ))
             )}
+            {loadingChat && <Spinner ml="auto" d="flex" />}
           </DrawerBody>
         </DrawerContent>
       </Drawer>
