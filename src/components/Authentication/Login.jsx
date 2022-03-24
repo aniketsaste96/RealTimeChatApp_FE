@@ -54,7 +54,7 @@ const Login = () => {
       );
       toast({
         title: "Login Success!",
-        status: "warning",
+        status: "success",
         duration: 5000,
         isClosable: true,
         position: "bottom",
@@ -63,7 +63,6 @@ const Login = () => {
       setLoading(false);
       history.push("/chats");
     } catch (error) {
-      console.log(error);
       toast({
         title: "Error Occured!!!",
         status: "error",

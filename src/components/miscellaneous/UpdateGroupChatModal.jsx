@@ -85,7 +85,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
         `http://localhost:5000/api/user?search=${search}`,
         config
       );
-      console.log(data);
+
       setLoading(false);
       setSearchResult(data);
     } catch (error) {

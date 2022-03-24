@@ -18,6 +18,7 @@ import {
   Input,
   ListItem,
   Spinner,
+  effect,
 } from "@chakra-ui/react";
 import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import React, { useState } from "react";
@@ -29,7 +30,9 @@ import { useToast } from "@chakra-ui/react";
 import axios from "axios";
 import ChatLoading from "../ChatLoading";
 import UserListItem from "../UserAvatar/UserListItem";
-
+import { getSender } from "../../config/ChatLogics";
+import NotificationBadge from "react-notification-badge";
+import { Effect } from "react-notification-badge";
 const SideDrawer = () => {
   const [state, setState] = useState("");
   const [search, setSearch] = useState([]);
@@ -40,7 +43,14 @@ const SideDrawer = () => {
   const history = useHistory();
   const toast = useToast();
   //context
-  const { user, setSelectedChat, chats, setChats } = ChatState();
+  const {
+    user,
+    setSelectedChat,
+    chats,
+    setChats,
+    notifications,
+    setNotifications,
+  } = ChatState();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const logoutHandler = () => {
@@ -143,9 +153,28 @@ const SideDrawer = () => {
         <div>
           <Menu>
             <MenuButton p={1}>
+              <NotificationBadge
+                count={notifications.length}
+                effect={Effect.SCALE}
+              />
               <BellIcon fontSize="2xl" m={1} />
             </MenuButton>
-            <MenuList></MenuList>
+            <MenuList pl={2}>
+              {!notifications.length && "No New Messages"}
+              {notifications.map((notify) => (
+                <MenuItem
+                  key={notify._id}
+                  onClick={() => {
+                    setSelectedChat(notify.chat);
+                    setNotifications(notifications.filter((n) => n !== notify));
+                  }}
+                >
+                  {notify.chat.isGroupChat
+                    ? `New Message in ${notify.chat.chatName}`
+                    : `New Message From ${getSender(user, notify.chat.users)}`}
+                </MenuItem>
+              ))}
+            </MenuList>
           </Menu>
           <Menu>
             <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
