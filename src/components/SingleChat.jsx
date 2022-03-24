@@ -28,7 +28,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const { user, selectedChat, setSelectedChat } = ChatState();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [newMessage, setNewMessage] = useState();
+  const [newMessage, setNewMessage] = useState("");
+  const [socketConnected, setSocketConnected] = useState(false);
   const toast = useToast();
 
   //fetch all chats
@@ -48,6 +49,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       console.log(data);
       setMessages(data);
       setLoading(false);
+      //create room with id of chat
+      socket.emit("join chat", selectedChat._id);
     } catch (error) {
       toast({
         title: "Error Occured",
@@ -60,9 +63,28 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
   };
   useEffect(() => {
+    socket = io(ENDPOINT);
+    //emit from here
+    socket.emit("setup", user);
+    socket.on("connected", () => setSocketConnected(true));
+  }, []);
+  useEffect(() => {
     fetchMessages();
+    selectedChatCompare = selectedChat;
   }, [selectedChat]);
 
+  useEffect(() => {
+    socket.on("message recieved", (newMessageRecieved) => {
+      if (
+        !selectedChatCompare ||
+        selectedChatCompare._id !== newMessageRecieved.chat._id
+      ) {
+        //give notification
+      } else {
+        setMessages([...messages, newMessageRecieved]);
+      }
+    });
+  });
   const sendMessage = async (event) => {
     if (event.key === "Enter" && newMessage) {
       try {
@@ -83,9 +105,10 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           config
         );
         console.log(data);
-
-        //append new chat
+        //emit
+        socket.emit("new message", data);
         setMessages([...messages, data]);
+        //append new chat
       } catch (error) {
         toast({
           title: "Error Occured",
@@ -99,9 +122,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
   };
 
-  useEffect(() => {
-    socket = io(ENDPOINT);
-  });
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
 
